@@ -5,15 +5,18 @@ import dang.aishwarya.entity.Readings;
 import dang.aishwarya.entity.Vehicle;
 import dang.aishwarya.repository.AlertsRepository;
 import dang.aishwarya.repository.ReadingRepository;
+import dang.aishwarya.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.util.Optional;
 
 @Service
 public class ReadingServiceImpl implements ReadingService {
+
+    @Autowired
+    VehicleRepository vehicleRepository;
 
     @Autowired
     ReadingRepository readingRepository;
@@ -21,29 +24,26 @@ public class ReadingServiceImpl implements ReadingService {
     @Autowired
     AlertsRepository alertsRepository;
 
-    @PersistenceContext
-    EntityManager em;
-
     @Override
     @Transactional
     public Readings updateReadings(Readings readings) {
-        Vehicle readingsOfVehicle = em.find(Vehicle.class, readings.getVin());
-        if (readingsOfVehicle != null) {
+        Optional<Vehicle> readingsOfVehicle = vehicleRepository.findById(readings.getVin()); //em.find(Vehicle.class, readings.getVin());
+        if (readingsOfVehicle.isPresent()) {
 
-            if (readings.getEngineRpm() > readingsOfVehicle.getRedlineRpm())
-                alertsRepository.createAlert(new Alerts("engineRpm > redlineRpm", "HIGH", readingsOfVehicle, readings.getTimestamp()));
-            if (readings.getFuelVolume() < (readingsOfVehicle.getMaxFuelVolume() / 10))
-                alertsRepository.createAlert(new Alerts("fuelVolume < 10% of maxFuelVolume", "MEDIUM", readingsOfVehicle, readings.getTimestamp()));
+            if (readings.getEngineRpm() > readingsOfVehicle.get().getRedlineRpm())
+                alertsRepository.save(new Alerts("engineRpm > redlineRpm", "HIGH", readingsOfVehicle.get(), readings.getTimestamp()));
+            if (readings.getFuelVolume() < (readingsOfVehicle.get().getMaxFuelVolume() / 10))
+                alertsRepository.save(new Alerts("fuelVolume < 10% of maxFuelVolume", "MEDIUM", readingsOfVehicle.get(), readings.getTimestamp()));
             if (32 > readings.getFrontLeft() || 32 > readings.getFrontRight() || 32 > readings.getRearLeft() || 32 > readings.getRearRight())
-                alertsRepository.createAlert(new Alerts("Tire Pressure Low", "LOW", readingsOfVehicle, readings.getTimestamp()));
+                alertsRepository.save(new Alerts("Tire Pressure Low", "LOW", readingsOfVehicle.get(), readings.getTimestamp()));
             if (36 < readings.getFrontLeft() || 36 < readings.getFrontRight() || 36 < readings.getRearLeft() || 36 < readings.getRearRight())
-                alertsRepository.createAlert(new Alerts("Tire Pressure High", "LOW", readingsOfVehicle, readings.getTimestamp()));
+                alertsRepository.save(new Alerts("Tire Pressure High", "LOW", readingsOfVehicle.get(), readings.getTimestamp()));
             if (readings.isEngineCoolantLow())
-                alertsRepository.createAlert(new Alerts("Engine Coolant Low", "LOW", readingsOfVehicle, readings.getTimestamp()));
+                alertsRepository.save(new Alerts("Engine Coolant Low", "LOW", readingsOfVehicle.get(), readings.getTimestamp()));
             if (readings.isCheckEngineLightOn())
-                alertsRepository.createAlert(new Alerts("Check Engine Light is On", "LOW", readingsOfVehicle, readings.getTimestamp()));
+                alertsRepository.save(new Alerts("Check Engine Light is On", "LOW", readingsOfVehicle.get(), readings.getTimestamp()));
         }
 
-        return readingRepository.updateReadings(readings);
+        return readingRepository.save(readings);
     }
 }

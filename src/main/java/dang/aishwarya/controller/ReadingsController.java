@@ -14,10 +14,10 @@ public class ReadingsController {
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST)
-    public void updateReadings(@RequestBody Readings readings) {
+    public Readings updateReadings(@RequestBody Readings readings) {
 
         System.out.println(readings);
 
-        readingService.updateReadings(readings);
+        return readingService.updateReadings(readings);
     }
 }

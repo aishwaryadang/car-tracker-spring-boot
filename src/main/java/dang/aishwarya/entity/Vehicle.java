@@ -1,13 +1,9 @@
 package dang.aishwarya.entity;
 
-import com.mysql.cj.protocol.ColumnDefinition;
 
 import javax.persistence.*;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Vehicle.findAll", query = "SELECT veh FROM Vehicle veh")
-})
 public class Vehicle {
 
     @Id
@@ -27,9 +23,6 @@ public class Vehicle {
     @Column( columnDefinition = "VARCHAR(40)" )
     private String lastServiceDate;
 
-
-    //@JoinColumn(name = "read_vin", nullable = false)
-    //@MapsId
     @OneToOne//(fetch = FetchType.LAZY)
     private Readings readings;
 

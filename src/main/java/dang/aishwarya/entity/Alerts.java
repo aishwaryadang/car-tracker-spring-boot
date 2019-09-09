@@ -3,11 +3,6 @@ package dang.aishwarya.entity;
 import javax.persistence.*;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Alerts.findHigh", query = "SELECT alerts FROM Alerts alerts WHERE alerts.priority = 'HIGH'"),
-        @NamedQuery(name = "Alerts.findHighSorted", query = "SELECT alerts FROM Alerts alerts WHERE alerts.priority = 'HIGH' ORDER BY alerts.vehicle.vin DESC"),
-        @NamedQuery(name = "Alerts.findByVin", query = "SELECT alerts FROM Alerts alerts WHERE alerts.vehicle.vin=:paramVin")
-})
 public class Alerts {
 
     @Id
